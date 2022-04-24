@@ -1,0 +1,80 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+using namespace std;
+
+struct Edge {
+	Edge(unsigned int first, unsigned int last, unsigned int w)
+	{
+		this->start = first;
+		this->end = last;
+		this->weight = w;
+	}
+	bool operator<(Edge& other) {
+		return this->weight < other.weight;
+	}
+public:
+	unsigned int weight, start, end;
+
+
+};
+
+
+int get_root(int v, vector<int>& p) {
+	if (p[v] == v) { return v; }
+	else {
+		return p[v] = get_root(p[v], p);
+	}
+}
+
+bool merge(int a, int b, vector<int>& p, vector<int>& rk) {
+	int ra = get_root(a, p);
+	int rb = get_root(b, p);
+	if (ra == rb) {
+		return false;
+	}
+	else {
+		if (rk[ra] < rk[rb]) {
+			p[ra] = rb;
+		}
+		else if (rk[rb] < rk[ra]) {
+			p[rb] = ra;
+		}
+		else {
+			p[ra] = rb;
+			rk[rb]++;
+		}
+		return true;
+	}
+}
+int main() {
+	setlocale(LC_ALL, "");
+	unsigned int n;
+	cout << "Введите количество ребер графа:";
+	cin >> n;
+	cout << "Введите ребра и их вес(формат:первая вершина-вторая вершина-вес ребра):" << endl;
+	unsigned int a, b, w;
+	unsigned int res = 0;
+	vector<Edge> edges;
+	vector<int> p(n+1);
+	vector<int> rk(n+1);
+	vector<pair<unsigned int, unsigned int>> points_pairs;
+	for (unsigned int i = 0; i <=n; ++i) {
+
+		p[i] = i;
+		rk[i] = 1;
+		if(i!=n-1)
+		cin >> a >> b >> w;
+		edges.push_back(Edge(a,b,w));
+	}
+	cout << "Минимальное остовое дерево(в виде списка ребер):" << endl;
+	sort(edges.begin(), edges.end());
+	for (Edge e : edges) {
+		if (merge(e.start, e.end, p, rk)) {
+			cout << e.start << "-" << e.end << endl;
+			res += e.weight;
+		}
+	}
+	cout << "Вес дерева:" << res;
+	return 0;
+}
